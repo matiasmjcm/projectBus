@@ -7,6 +7,7 @@
 
 //#include "types.h"
 #include "ligneBus.h"
+#include "gestionficher.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,17 +56,66 @@ int main(int argc, char* argv[])
         /**********************************************************************/
 
 
+        TligneBus lignes[10]; // espacio para hasta 10 líneas
+        Tbus bus[10];         // espacio para hasta 10 buses
+        int nbLignes = 0, nbBus = 0;
+
+        FILE *test = fopen("donnees_sauvegarde.txt", "r");
+        if (test) {
+            fclose(test);
+            printf("Archivo encontrado, cargando datos...\n");
+            chargerDonnees("donnees_sauvegarde.txt", lignes, &nbLignes, bus, &nbBus);
+        } else {
+            printf("Archivo no encontrado. Creando líneas manualmente...\n");
+
+            // Crear desde cero (como hacías antes)
+            lignes[0].idLigneBus = 1;
+            lignes[0].nomLigne = strdup("Ligne 1");
+            lignes[0].depart = creeLigneDeBus1();
+            lignes[0].arrivee = getptrLastCell(lignes[0].depart);
+            nbLignes++;
+
+            lignes[1].idLigneBus = 2;
+            lignes[1].nomLigne = strdup("Ligne 2");
+            lignes[1].depart = creeLigneDeBus2();
+            lignes[1].arrivee = getptrLastCell(lignes[1].depart);
+            nbLignes++;
+
+            lignes[2].idLigneBus = 3;
+            lignes[2].nomLigne = strdup("Ligne 3");
+            lignes[2].depart = creeLigneDeBus3();
+            lignes[2].arrivee = getptrLastCell(lignes[2].depart);
+            nbLignes++;
+
+            // Creamos un bus manualmente como antes
+            bus[0] = creeBus(1, lignes[0].depart);
+            nbBus++;
+        }
+
+        // Usar el primer bus
+        Tbus bus1 = bus[0];
+
+
+        /*-----------------------------------------------*/
+        /*
         TlisteStation ligne1 = creeLigneDeBus1();
         TlisteStation ligne2 = creeLigneDeBus2();
         TlisteStation ligne3 = creeLigneDeBus3();
-
+        */
         //création d'un (seul) bus
-        Tbus bus1 = creeBus(1,ligne1);
+        //Tbus bus1 = creeBus(1,ligne1);
 
+        /*
         //affiche sur la console les stations et troncons des lignes de bus
         afficheConsoleLigneBus(ligne1);
         afficheConsoleLigneBus(ligne2);
         afficheConsoleLigneBus(ligne3);
+        */
+
+        for (int i = 0; i < nbLignes; i++) {
+            afficheConsoleLigneBus(lignes[i].depart);
+        }
+
 
         //Current animation frame
         int frame = 0;
@@ -110,21 +160,29 @@ int main(int argc, char* argv[])
                 if ( pKeyStates[SDL_SCANCODE_1] ){
 
                         printf("\nTouche 1, Bus au depart de la ligne 1\n");
-                        busSurStation(bus1, ligne1, depart_vers_arrivee);
+                        //busSurStation(bus1, ligne1, depart_vers_arrivee);
+                        busSurStation(bus1, lignes[0].depart, depart_vers_arrivee);
                         Affiche_Sprite(&gSpriteBus, gRenderer, getPosXBus( bus1 ), getPosYBus( bus1 ), getIdFrame(frame));
                 }
                 if ( pKeyStates[SDL_SCANCODE_2] ){
 
                         printf("\nTouche 2, Bus au départ de la ligne 2\n");
-                        busSurStation(bus1, ligne2, depart_vers_arrivee);
+                        //busSurStation(bus1, ligne2, depart_vers_arrivee);
+                        busSurStation(bus1, lignes[1].depart, depart_vers_arrivee);
                         Affiche_Sprite(&gSpriteBus, gRenderer, getPosXBus( bus1 ), getPosYBus( bus1 ), getIdFrame(frame));
                 }
                 if ( pKeyStates[SDL_SCANCODE_3] ){
 
                         printf("\nTouche 3, Bus au départ de la ligne 3\n");
-                        busSurStation(bus1, ligne3, depart_vers_arrivee);
+                        //busSurStation(bus1, ligne3, depart_vers_arrivee);
+                        busSurStation(bus1, lignes[2].depart, depart_vers_arrivee);
                         Affiche_Sprite(&gSpriteBus, gRenderer, getPosXBus( bus1 ), getPosYBus( bus1 ), getIdFrame(frame));
                 }
+                if (pKeyStates[SDL_SCANCODE_D]) {
+                    printf("Guardando datos...\n");
+                    sauvegarderDonnees("donnees_sauvegarde.txt", lignes, nbLignes, bus, nbBus);
+                }
+
                 if ( pKeyStates[SDL_SCANCODE_ESCAPE] ){
 
                         printf("\nTouche ECHAP");
@@ -141,9 +199,9 @@ int main(int argc, char* argv[])
                 Deplace_Sprite(&gSpriteBus, gRenderer, incXDeplSpriteBus1,incYDeplSpriteBus1,getIdFrame(frame));
 
                 //réaffichage à chaque tour de toutes les stations
-                DessineUneLigneBus(ligne1, gSpriteArretBus, gRenderer);
-                DessineUneLigneBus(ligne2, gSpriteArretBus, gRenderer);
-                DessineUneLigneBus(ligne3, gSpriteArretBus, gRenderer);
+                DessineUneLigneBus(lignes[0].depart, gSpriteArretBus, gRenderer);
+                DessineUneLigneBus(lignes[1].depart, gSpriteArretBus, gRenderer);
+                DessineUneLigneBus(lignes[2].depart, gSpriteArretBus, gRenderer);
 
                 //affichage de la texture ainsi mis à jour
                 maj_fenetre_texture(gRenderer);
